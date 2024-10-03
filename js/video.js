@@ -1,3 +1,13 @@
+// timefunction
+function getTimeString(time){
+    // get hour and rest seconds 
+    const hour = parseInt(time / 3600);
+    let remainingSecond = time % 3600;
+    const minutes = parseInt(remainingSecond / 60);
+    remainingSecond = remainingSecond % 60;
+    return `${hour} hour ${minutes} minute ${remainingSecond} second ago`
+}
+
 // fetch, load and show categories on html 
 
 // create loadCategories
@@ -17,9 +27,35 @@ fetch('https://openapi.programming-hero.com/api/phero-tube/videos')
 .catch(error => console.log('eRror:', error))
 }
 
+const loadCategoryVideos =(id) => {
+  
+    fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)
+    .then(res => res.json())
+    .then(data => displayVideos(data.category))
+    .catch(error => console.log(error))
+}
+
 // create displayVideos 
 const displayVideos = (videos) =>{
     const videosContainer = document.getElementById('videos');
+    videosContainer.innerHTML = "";
+
+    if(videos.length == 0){
+        videosContainer.classList.remove("grid")
+        videosContainer.innerHTML = `
+        
+        <div class = "min-h-[300px] w-full flex flex-col gap-5 justify-center items-center">
+        <img src ="../images/Icon.png" />
+        <h1 class ="text-center font-bold text-xl"> Oops!! Sorry, There is no content here
+        </h1>
+        </div>
+
+        `;
+        return;
+    }
+    else{
+        videosContainer.classList.add("grid");
+    }
    videos.forEach((video) =>{
    
     const card = document.createElement( 'div');
@@ -31,7 +67,9 @@ const displayVideos = (videos) =>{
       src= ${video.thumbnail}
       class ="h-full w-full object-cover"
       alt="video" />
-      <span class ="absolute right-2 bottom-2 text-white bg-black rounded p-1">${video.others.posted_date}</span>
+${video.others.posted_date?.length === 0 ? "":`<span class ="absolute right-2 bottom-2 text-white text-xs bg-black rounded p-1">${getTimeString(video.others.posted_date)}</span>` }
+
+      
   </figure>
   <div class="px-0 py-3 flex gap-2">
 
@@ -59,11 +97,18 @@ const displayCategories = (categories) => {
     const categoryContainer = document.getElementById('categories');
     categories.forEach((item) => {
         // create a button
-        const button = document.createElement('button');
-        button.classList = 'btn';
-        button.innerText = item.category;
-        // add button to category container 
-        categoryContainer.append(button);
+        const buttonContainer = document.createElement('button');
+        // button.classList = 'btn';
+        // button.innerText = item.category;
+        buttonContainer.innerHTML = `
+        
+        <button onclick ="loadCategoryVideos(${item.category_id})" class ="btn">
+        ${item.category}
+        </button>
+        
+        `
+        // add buttonContainer to category container 
+        categoryContainer.append(buttonContainer);
     })
 }
 
